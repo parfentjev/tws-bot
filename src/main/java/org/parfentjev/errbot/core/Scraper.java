@@ -1,5 +1,7 @@
 package org.parfentjev.errbot.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,12 +13,16 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.parfentjev.errbot.misc.Utils.await;
 
 public class Scraper extends Thread {
+    private static final Logger logger = LogManager.getLogger("Scraper");
+    private static final Pattern pattern = Pattern.compile(Properties.CORRECT_URL_PATTERN);
+
     private final String baseUrl;
     private final Integer pollingInterval;
     private final ArticleService articleService;
@@ -53,7 +59,7 @@ public class Scraper extends Thread {
                 .stream()
                 .filter(this::elementTextOrLinkNotEmpty)
                 .map(this::mapElementToArticle)
-                .filter(this::urlMatchesCorrectPattern)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -61,7 +67,7 @@ public class Scraper extends Thread {
         try {
             return Jsoup.connect(baseUrl).get();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
 
             return null;
         }
@@ -73,14 +79,13 @@ public class Scraper extends Thread {
 
     private Article mapElementToArticle(Element element) {
         var href = element.attr("href");
-        var url = href.startsWith("//") ? "https:" + href : href;
-        var id = Long.valueOf(url.split("/")[3]);
+        var matcher = pattern.matcher(href);
 
-        return new Article(id, element.text(), url);
-    }
+        if (!matcher.matches()) {
+            return null;
+        }
 
-    private boolean urlMatchesCorrectPattern(Article article) {
-        return Pattern.matches(Properties.CORRECT_URL_PATTERN, article.getUrl());
+        return new Article(Long.valueOf(matcher.group(1)), element.text(), href.startsWith("//") ? "https:" + href : href);
     }
 
     private boolean newArticle(Article article) {

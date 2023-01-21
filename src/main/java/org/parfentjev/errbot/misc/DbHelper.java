@@ -4,6 +4,8 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -11,10 +13,23 @@ import java.util.List;
 import java.util.function.Function;
 
 public class DbHelper<DC, ID> {
-    private final Class<DC> dataClass;
+    private static final Logger logger = LogManager.getLogger("DbHelper");
+    private static JdbcConnectionSource connectionSource;
+
+    private final Dao<DC, ID> dao;
 
     public DbHelper(Class<DC> dataClass) {
-        this.dataClass = dataClass;
+        try {
+            if (connectionSource == null) {
+                connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + Properties.DATABASE_PATH);
+            }
+
+            dao = DaoManager.createDao(connectionSource, dataClass);
+        } catch (SQLException e) {
+            logger.error(e);
+
+            throw new RuntimeException(e);
+        }
 
         createTable();
     }
@@ -30,6 +45,8 @@ public class DbHelper<DC, ID> {
 
                 return false;
             } catch (SQLException e) {
+                logger.error(e);
+
                 throw new RuntimeException(e);
             }
         });
@@ -40,7 +57,7 @@ public class DbHelper<DC, ID> {
             try {
                 return dao.queryForId(id);
             } catch (SQLException e) {
-                e.printStackTrace();
+                logger.error(e);
 
                 return null;
             }
@@ -54,7 +71,7 @@ public class DbHelper<DC, ID> {
 
                 return true;
             } catch (SQLException e) {
-                e.printStackTrace();
+                logger.error(e);
 
                 return false;
             }
@@ -68,7 +85,7 @@ public class DbHelper<DC, ID> {
 
                 return true;
             } catch (SQLException e) {
-                e.printStackTrace();
+                logger.error(e);
 
                 return false;
             }
@@ -80,7 +97,7 @@ public class DbHelper<DC, ID> {
             try {
                 return dao.queryForAll();
             } catch (SQLException e) {
-                e.printStackTrace();
+                logger.error(e);
 
                 return Collections.emptyList();
             }
@@ -88,12 +105,6 @@ public class DbHelper<DC, ID> {
     }
 
     private <T> T queryData(Function<Dao<DC, ID>, T> daoFunction) {
-        try (JdbcConnectionSource connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + Properties.DATABASE_PATH)) {
-            return daoFunction.apply(DaoManager.createDao(connectionSource, dataClass));
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            return null;
-        }
+        return daoFunction.apply(dao);
     }
 }

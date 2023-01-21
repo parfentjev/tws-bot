@@ -1,11 +1,16 @@
 package org.parfentjev.errbot.misc;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Utils {
+    private static final Logger logger = LogManager.getLogger("Utils");
+
     public static void await(Integer milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 

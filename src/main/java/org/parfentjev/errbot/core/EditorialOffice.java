@@ -1,5 +1,7 @@
 package org.parfentjev.errbot.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parfentjev.errbot.core.article.Article;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ public class EditorialOffice {
     private static EditorialOffice instance;
 
     private static final List<Subscription> subscriptions = new ArrayList<>();
+    private static final Logger logger = LogManager.getLogger("EditorialOffice");
 
     private EditorialOffice() {
         // empty constructor
@@ -28,6 +31,7 @@ public class EditorialOffice {
         String postText = String.format("%s%n%n%s", article.getTitle(), article.getUrl());
 
         subscriptions.forEach(subscription -> {
+            logger.info("Sending article: " + article.getUrl());
             subscription.sender().send(postText, subscription.chatId());
 
             await(10000);
