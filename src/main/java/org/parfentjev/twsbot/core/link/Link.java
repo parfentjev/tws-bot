@@ -1,4 +1,4 @@
-package org.parfentjev.errbot.core.article;
+package org.parfentjev.twsbot.core.link;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -6,9 +6,9 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.time.Instant;
 
 @DatabaseTable
-public class Article {
+public class Link {
     @DatabaseField(id = true)
-    private Long id;
+    private String id;
 
     @DatabaseField
     private Long addedTime;
@@ -17,11 +17,11 @@ public class Article {
 
     private String url;
 
-    public Article() {
+    public Link() {
         // empty constructor
     }
 
-    public Article(Long id, String title, String url) {
+    public Link(String id, String title, String url) {
         this.title = title;
         this.id = id;
         this.addedTime = Instant.now().getEpochSecond();
@@ -52,11 +52,11 @@ public class Article {
         this.addedTime = addedTime;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

@@ -1,23 +1,22 @@
-package org.parfentjev.errbot.core;
+package org.parfentjev.twsbot.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.parfentjev.errbot.core.article.Article;
-import org.parfentjev.errbot.core.article.ArticleService;
-import org.parfentjev.errbot.misc.Properties;
+import org.parfentjev.twsbot.core.link.Link;
+import org.parfentjev.twsbot.core.link.LinkService;
+import org.parfentjev.twsbot.core.exceptions.DatabaseHelperException;
+import org.parfentjev.twsbot.misc.Properties;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.parfentjev.errbot.misc.Utils.await;
+import static java.text.MessageFormat.format;
+import static org.parfentjev.twsbot.misc.Utils.await;
 
 public class Scraper extends Thread {
     private static final Logger logger = LogManager.getLogger("Scraper");
@@ -25,12 +24,12 @@ public class Scraper extends Thread {
 
     private final String baseUrl;
     private final Integer pollingInterval;
-    private final ArticleService articleService;
+    private final LinkService linkService;
 
     public Scraper(String baseUrl, Integer pollingInterval) {
         this.baseUrl = baseUrl;
         this.pollingInterval = pollingInterval;
-        this.articleService = new ArticleService();
+        this.linkService = new LinkService();
     }
 
     @Override
@@ -38,7 +37,7 @@ public class Scraper extends Thread {
         while (true) {
             getArticles()
                     .stream()
-                    .filter(this::newArticle)
+                    .filter(link -> linkService.getLinkByUrl(link.getId()).isEmpty())
                     .collect(Collectors.toCollection(LinkedList::new))
                     .descendingIterator()
                     .forEachRemaining(this::postArticle);
@@ -47,7 +46,7 @@ public class Scraper extends Thread {
         }
     }
 
-    private List<Article> getArticles() {
+    private List<Link> getArticles() {
         Document document = getDocument();
 
         if (document == null) {
@@ -55,7 +54,7 @@ public class Scraper extends Thread {
         }
 
         return document
-                .select(Properties.POST_LINK_CSS_SELECTOR)
+                .select(Properties.LINK_CSS_SELECTOR)
                 .stream()
                 .filter(this::elementTextOrLinkNotEmpty)
                 .map(this::mapElementToArticle)
@@ -77,7 +76,7 @@ public class Scraper extends Thread {
         return !(element.text().isBlank() || element.attr("href").isBlank());
     }
 
-    private Article mapElementToArticle(Element element) {
+    private Link mapElementToArticle(Element element) {
         var href = element.attr("href");
         var matcher = pattern.matcher(href);
 
@@ -85,18 +84,15 @@ public class Scraper extends Thread {
             return null;
         }
 
-        return new Article(Long.valueOf(matcher.group(1)), element.text(), href.startsWith("//") ? "https:" + href : href);
+        return new Link(matcher.group(1), element.text(), href.startsWith("//") ? "https:" + href : href);
     }
 
-    private boolean newArticle(Article article) {
-        return articleService.getArticleByUrl(article.getId()) == null;
-    }
-
-    private void postArticle(Article article) {
-        if (!articleService.saveArticle(article)) {
-            return;
+    private void postArticle(Link link) {
+        try {
+            linkService.saveLink(link);
+            EditorialOffice.getInstance().post(link);
+        } catch (DatabaseHelperException e) {
+            logger.error(format("Failed to save: {} [{}}]", link.getUrl(), link.getId()));
         }
-
-        EditorialOffice.getInstance().post(article);
     }
 }

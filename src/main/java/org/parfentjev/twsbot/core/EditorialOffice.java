@@ -1,13 +1,13 @@
-package org.parfentjev.errbot.core;
+package org.parfentjev.twsbot.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.parfentjev.errbot.core.article.Article;
+import org.parfentjev.twsbot.core.link.Link;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.parfentjev.errbot.misc.Utils.await;
+import static org.parfentjev.twsbot.misc.Utils.await;
 
 public class EditorialOffice {
     private static EditorialOffice instance;
@@ -27,11 +27,11 @@ public class EditorialOffice {
         return instance;
     }
 
-    public void post(Article article) {
-        String postText = String.format("%s%n%n%s", article.getTitle(), article.getUrl());
+    public void post(Link link) {
+        String postText = String.format("%s%n%n%s", link.getTitle(), link.getUrl());
 
         subscriptions.forEach(subscription -> {
-            logger.info("Sending article: " + article.getUrl());
+            logger.info("Sending link: " + link.getUrl());
             subscription.sender().send(postText, subscription.chatId());
 
             await(10000);

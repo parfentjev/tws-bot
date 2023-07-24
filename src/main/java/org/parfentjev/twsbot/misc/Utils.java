@@ -1,4 +1,4 @@
-package org.parfentjev.errbot.misc;
+package org.parfentjev.twsbot.misc;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

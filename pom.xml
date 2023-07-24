@@ -1,7 +1,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.parfentjev</groupId>
-    <artifactId>errbot</artifactId>
+    <artifactId>tws-bot</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
@@ -56,13 +56,22 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.parfentjev.errbot.Main</mainClass>
+                            <mainClass>org.parfentjev.twsbot.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

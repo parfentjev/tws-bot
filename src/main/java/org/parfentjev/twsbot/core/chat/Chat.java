@@ -1,4 +1,4 @@
-package org.parfentjev.errbot.core.chat;
+package org.parfentjev.twsbot.core.chat;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;

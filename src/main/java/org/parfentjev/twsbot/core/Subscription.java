@@ -1,4 +1,4 @@
-package org.parfentjev.errbot.core;
+package org.parfentjev.twsbot.core;
 
 import org.telegram.abilitybots.api.sender.SilentSender;
 
