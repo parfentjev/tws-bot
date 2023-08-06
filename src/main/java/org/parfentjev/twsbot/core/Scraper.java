@@ -91,7 +91,7 @@ public class Scraper extends Thread {
         try {
             linkService.saveLink(link);
             EditorialOffice.getInstance().post(link);
-        } catch (DatabaseHelperException e) {
+        } catch (DatabaseHelperException | IllegalArgumentException e) {
             logger.error(format("Failed to save: {} [{}}]", link.getUrl(), link.getId()));
         }
     }
