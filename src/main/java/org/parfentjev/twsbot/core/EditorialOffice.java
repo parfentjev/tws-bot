@@ -7,8 +7,6 @@ import org.parfentjev.twsbot.core.link.Link;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.parfentjev.twsbot.misc.Utils.await;
-
 public class EditorialOffice {
     private static EditorialOffice instance;
 
@@ -33,8 +31,6 @@ public class EditorialOffice {
         subscriptions.forEach(subscription -> {
             logger.info("Sending link: " + link.getUrl());
             subscription.sender().send(postText, subscription.chatId());
-
-            await(10000);
         });
     }
 
