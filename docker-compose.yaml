@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  service:
+    build: .
+    image: tws-bot:latest
+    environment:
+      - TOKEN=${TOKEN}
+      - CHAT_ID=${CHAT_ID}
+      - URL=${URL}
+      - SELECTOR=${SELECTOR}
+      - REGEX=${REGEX}
+      - DB_PATH=${DB_PATH}
+    volumes:
+      - data:${DB_FILE}
+
+volumes:
+  data:

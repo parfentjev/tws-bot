@@ -1,7 +1,4 @@
-.idea/
-target/
-src/main/resources/dev.properties
-*_bot
-*.db
-*.db-journal
-dev.env
+.vscode/
+.env
+bot.db
+image.tar

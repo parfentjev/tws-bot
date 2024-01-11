@@ -1,59 +1,60 @@
 # Telegram Web Scraper Bot
 
-The Telegram Web Scraper Bot is a straightforward application designed to fetch links from a specified website and post them to a chosen Telegram chat.
+The Telegram Web Scraper Bot is a simple application designed to retrieve links from a specified webpage and post them to a designated Telegram chat.
 
-## Build and Run
+## Configuration
 
-To use this bot, follow these steps:
+The bot's configuration is managed through an `.env` file located in the root directory. The file should contain the following key-value pairs:
 
-1. Clone this repository.
-2. Create an environment file (e.g., `myenv.env`), and set your required properties. You can use the provided `.env` file as a reference.
-
-The environment file should include these properties:
-
-```properties
-# URL of the webpage from which to extract links
-BASE_URL="https://rus.err.ee"
-# CSS selector that identifies the <a> tags to collect
-LINK_CSS_SELECTOR=".left-block .article > article h2 a"
-# Regex pattern used to validate links, as some might lead to other websites, etc.
-CORRECT_URL_PATTERN="(?:https:)?\/\/rus\.err\.ee\/(\\d+)\/.+"
-# Frequency (in milliseconds) to check the BASE_URL
-POLLING_INTERVAL="60000"
-# (For internal use) path to the database
-DATABASE_PATH="volumes/"
-# Your Telegram user ID, needed to access chat commands
-ADMIN_ID="YOUR_TELEGRAM_USER_ID"
-# Token for your Telegram bot
-BOT_TOKEN="YOUR_BOTS_TOKEN"
-# Username of your Telegram bot
-BOT_USERNAME="YOUR_BOTS_USERNAME"
+```yaml
+TOKEN="token from @BotFather"
+CHAT_ID="recipient's chat id"
+URL="target webpage URL"
+SELECTOR="CSS selector to find links"
+REGEX="regex to extract an item id"
+DB_PATH="directory where bot.db should be stored"
 ```
 
-After setting up the environment file, run the following command:
+For example, to scrape [rus.err.ee](https://rus.err.ee/), your `.env` file might look like this:
+
+```yaml
+TOKEN="token from @BotFather"
+CHAT_ID="recipient's chat id"
+URL="https://rus.err.ee/"
+SELECTOR=".left-block .article > article h2 a"
+REGEX="(?:https:)?//rus\\.err\\.ee/(\\d+)/.+"
+DB_PATH="/home/username/Projects/tws-bot/"
+```
+
+**Important Notes:**
+
+- `DB_PATH="/data/"` is the expected directory path for the Docker image.
+- The regular expression (`REGEX`) is utilized to validate and extract the item ID from a URL. It **must** contain a single capturing group, which the bot uses to determine the link's validity.
+
+## Running the Bot
+
+To run the bot locally, create an `.env` file with your configuration and execute the following command:
 
 ```shell
-docker-compose --env-file myenv.env up --build -d
+go run .
 ```
 
-## Usage
-
-The bot understands two commands:
-
-* `/add <chatId>` - Adds a chat recipient for new articles.
-* `/delete <chatId>` - Removes a chat.
-
-To find the chat ID, you can forward a message from the chat to `@RawDataBot`.
-
-## Update
-
-To update the container after a `git pull` or a modification of properties, execute the following commands:
+Alternatively, to run it in a Docker container:
 
 ```shell
-docker-compose down
-docker-compose --env-file myenv.env up --build -d
+make run
 ```
 
-## Known Limitations
+## Building the Image
 
-Currently, the bot does not support relative links. If a link does not contain a domain (`href="/relative/path/index.html"`), the bot will not append the `BASE_URL`.
+The provided `Makefile` includes commands optimized for deploying on `linux/arm64` platforms, such as a Raspberry Pi. The commands are:
+
+- `make image`: Builds the Docker image.
+- `make deploy`: Deploys the container to a remote host.
+
+Note that the deployment command requires two environment variables:
+
+- `TWS_BOT_REMOTE_HOST`: The remote host (e.g., `admin@domain.com`).
+- `TWS_BOT_REMOTE_PATH`: The remote path where `docker-compose.yaml` and environment file(s) are located (e.g., `/home/admin/tws-bot/`).
+
+These commands are tailored to my Raspberry Pi setup, probably you won't be using them. The Docker Compose file, however, is versatile and can be used as is.
