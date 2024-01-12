@@ -8,8 +8,8 @@ import (
 
 	"codeberg.org/parfentjev/tws-bot/internal/config"
 	"codeberg.org/parfentjev/tws-bot/internal/db"
-	"codeberg.org/parfentjev/tws-bot/pkg/extractor"
-	"codeberg.org/parfentjev/tws-bot/pkg/telegram"
+	"codeberg.org/parfentjev/tws-bot/internal/extractor"
+	"codeberg.org/parfentjev/tws-bot/internal/telegram"
 )
 
 func main() {
