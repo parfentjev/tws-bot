@@ -9,6 +9,7 @@ import (
 	"codeberg.org/parfentjev/tws-bot/internal/config"
 	"codeberg.org/parfentjev/tws-bot/internal/db"
 	"codeberg.org/parfentjev/tws-bot/pkg/extractor"
+	"codeberg.org/parfentjev/tws-bot/pkg/telegram"
 )
 
 func main() {
@@ -54,7 +55,9 @@ func fetchItems(dataChannel chan extractor.Item) {
 }
 
 func postItems(dataChannel chan extractor.Item) {
+	bot := telegram.New(config.Token)
+
 	for item := range dataChannel {
-		fmt.Println("posting to telegram", item)
+		bot.SendMessage(config.ChatId, fmt.Sprintf("%v\n\n%v", item.Text, item.Url))
 	}
 }
