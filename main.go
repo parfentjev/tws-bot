@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	db.Init()
+
 	var (
 		waitGroup   sync.WaitGroup
 		dataChannel chan extractor.Item = make(chan extractor.Item)
@@ -35,8 +37,6 @@ func main() {
 }
 
 func fetchItems(dataChannel chan extractor.Item) {
-	db := db.New()
-
 	for {
 		items, err := extractor.GetItems(config.Url, config.Selector, config.RegEx)
 		if err != nil {

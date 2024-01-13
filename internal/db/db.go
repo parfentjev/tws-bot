@@ -10,47 +10,49 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Database struct {
-	conn *sql.DB
-}
+var Database *sql.DB
 
-func New() *Database {
-	conn, err := sql.Open("sqlite3", fmt.Sprintf("file:%vbot.db", config.DbPath))
+func Init() {
+	var err error
+
+	Database, err = sql.Open("sqlite3", fmt.Sprintf("file:%vbot.db", config.DbPath))
 	if err != nil {
 		log.Panic(err)
 	}
 
-	createTable(conn)
-
-	return &Database{conn}
+	Database.SetMaxOpenConns(1)
+	Database.SetMaxIdleConns(1)
+	createTable()
 }
 
-func createTable(conn *sql.DB) {
-	_, err := conn.Exec(query.CreateItemsTable)
+func createTable() {
+	_, err := Database.Exec(query.CreateItemsTable)
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
-func (db *Database) ItemExists(id string) bool {
-	statement, err := db.conn.Prepare(query.SelectCountItems)
+func ItemExists(id string) bool {
+	statement, err := Database.Prepare(query.SelectCountItems)
 	if err != nil {
 		log.Print(err)
 		return true
 	}
 
+	defer statement.Close()
 	var count int
 	statement.QueryRow(id).Scan(&count)
 
 	return count > 0
 }
 
-func (db *Database) InsertItem(id string) {
-	statement, err := db.conn.Prepare(query.InsertItem)
+func InsertItem(id string) {
+	statement, err := Database.Prepare(query.InsertItem)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
 	statement.Exec(id)
+	statement.Close()
 }

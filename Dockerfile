@@ -3,7 +3,6 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY ./internal ./internal
-COPY ./pkg ./pkg
 COPY ./main.go ./main.go
 RUN GOOS=linux go build -a -installsuffix cgo -o tws-bot .
 
