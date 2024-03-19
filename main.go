@@ -58,6 +58,6 @@ func postItems(dataChannel chan extractor.Item) {
 	bot := telegram.New(config.Token)
 
 	for item := range dataChannel {
-		bot.SendMessage(config.ChatId, fmt.Sprintf("%v\n\n%v", item.Text, item.Url))
+		bot.SendMessage(config.ChatId, fmt.Sprint(item.Url))
 	}
 }

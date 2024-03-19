@@ -11,9 +11,8 @@ import (
 )
 
 type Item struct {
-	Id   string
-	Url  string
-	Text string
+	Id  string
+	Url string
 }
 
 func GetItems(url, selector string, regex string) ([]Item, error) {
@@ -37,14 +36,13 @@ func extractItems(doc *goquery.Document, selector string, regex string) []Item {
 	doc.Find(selector).Each(func(i int, s *goquery.Selection) {
 		url, urlExists := s.Attr("href")
 		id := extractId(url, regex)
-		text := s.Text()
 
-		if urlExists && len(id) > 0 && len(text) > 0 {
+		if urlExists && len(id) > 0 {
 			if strings.HasPrefix(url, "//") {
 				url = fmt.Sprint("https:", url)
 			}
 
-			items = append(items, Item{id, url, text})
+			items = append(items, Item{id, url})
 		}
 	})
 
